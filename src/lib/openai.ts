@@ -1,13 +1,15 @@
 import OpenAI from "openai";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+let client: OpenAI | null = null;
 
-if (!OPENAI_API_KEY) {
-  throw new Error(
-    "Missing OPENAI_API_KEY environment variable. Add it to .env.local"
-  );
+export function getOpenAIClient(): OpenAI {
+  if (client) return client;
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "Missing OPENAI_API_KEY environment variable. Add it to .env.local or Vercel Environment Variables."
+    );
+  }
+  client = new OpenAI({ apiKey });
+  return client;
 }
-
-export const openaiClient = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});

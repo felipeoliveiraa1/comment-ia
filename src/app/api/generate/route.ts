@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { openaiClient } from "@/lib/openai";
+import { getOpenAIClient } from "@/lib/openai";
 import { buildUserPrompt, getSystemPrompt } from "@/lib/prompts";
 import type {
   GenerateRequest,
@@ -52,7 +52,8 @@ export async function POST(
     }
     const systemPrompt = getSystemPrompt();
     const userPrompt = buildUserPrompt(body.product);
-    const completion = await openaiClient.chat.completions.create({
+    const openai = getOpenAIClient();
+    const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
