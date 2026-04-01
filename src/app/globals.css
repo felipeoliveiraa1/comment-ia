@@ -1,0 +1,281 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf8f5;
+  --foreground: #1a1a1a;
+  --accent: #f59e0b;
+  --accent-hover: #d97706;
+  --card-bg: #ffffff;
+  --input-bg: #f5f3f0;
+  --input-border: #e5e0d8;
+  --input-focus: #f59e0b;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f0f0f;
+    --foreground: #ededed;
+    --card-bg: #1a1a1a;
+    --input-bg: #252525;
+    --input-border: #333333;
+  }
+}
+
+*,
+*::before,
+*::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+}
+
+/* Card — mobile-first padding */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 640px) {
+  .card {
+    border-radius: 16px;
+    padding: 24px;
+  }
+}
+
+/* Form elements — 44px minimum touch target */
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--foreground);
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 12px;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+@media (min-width: 640px) {
+  .form-input {
+    font-size: 0.9375rem;
+  }
+}
+
+.form-input:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--foreground);
+  opacity: 0.35;
+}
+
+select.form-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+/* Buttons — 48px touch target on mobile */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    box-shadow 0.2s,
+    opacity 0.2s;
+  box-shadow:
+    0 2px 8px rgba(245, 158, 11, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 640px) {
+  .btn-primary {
+    padding: 12px 24px;
+  }
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 16px rgba(245, 158, 11, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  background: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+@media (min-width: 640px) {
+  .btn-secondary {
+    padding: 12px 20px;
+  }
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--input-border);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* WhatsApp preview — responsive padding */
+.whatsapp-preview {
+  background: #efeae2;
+  border-radius: 10px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .whatsapp-preview {
+    border-radius: 12px;
+    padding: 16px;
+  }
+}
+
+.whatsapp-preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.whatsapp-preview > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out;
+}
+
+/* Utility: line-clamp */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Touch-friendly copy button — always visible on mobile */
+.history-copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 8px;
+  border-radius: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  cursor: pointer;
+  transition:
+    opacity 0.15s,
+    background-color 0.15s;
+}
+
+@media (hover: hover) {
+  .history-copy-btn {
+    opacity: 0;
+  }
+  .history-item:hover .history-copy-btn {
+    opacity: 1;
+  }
+}
+
+.history-copy-btn:active {
+  background: var(--input-border);
+  transform: scale(0.95);
+}
