@@ -19,6 +19,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   interimResults: boolean;
   start: () => void;
   stop: () => void;
+  abort: () => void;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
   onerror: ((event: { error: string }) => void) | null;
   onend: (() => void) | null;
@@ -40,53 +41,88 @@ function isSpeechSupported(): boolean {
 
 export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
   const [description, setDescription] = useState("");
+  const [interimText, setInterimText] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [hasSpeech, setHasSpeech] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const baseTextRef = useRef("");
+  const wantsListeningRef = useRef(false);
+  const accumulatedRef = useRef("");
 
   useEffect(() => {
     setHasSpeech(isSpeechSupported());
   }, []);
 
-  const stopListening = useCallback(() => {
-    recognitionRef.current?.stop();
-    setIsListening(false);
+  const createRecognition = useCallback((): SpeechRecognitionInstance | null => {
+    const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechAPI) return null;
+    const recognition = new SpeechAPI();
+    recognition.lang = "pt-BR";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const result = event.results[0];
+      if (!result) return;
+      const transcript = result[0].transcript;
+      if (result.isFinal) {
+        const separator = accumulatedRef.current.length > 0 ? " " : "";
+        accumulatedRef.current += separator + transcript;
+        setDescription(accumulatedRef.current);
+        setInterimText("");
+      } else {
+        setInterimText(transcript);
+      }
+    };
+    recognition.onerror = (event) => {
+      if (event.error === "no-speech" || event.error === "aborted") return;
+      toast.error("Erro no microfone. Verifique as permissões.");
+      wantsListeningRef.current = false;
+      setIsListening(false);
+    };
+    recognition.onend = () => {
+      if (wantsListeningRef.current) {
+        try {
+          const next = createRecognition();
+          if (next) {
+            recognitionRef.current = next;
+            next.start();
+            return;
+          }
+        } catch {
+          /* falls through to stop */
+        }
+      }
+      setIsListening(false);
+      setInterimText("");
+    };
+    return recognition;
   }, []);
 
-  const startListening = useCallback(() => {
+  function startListening(): void {
     const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechAPI) {
       toast.error("Seu navegador não suporta reconhecimento de voz.");
       return;
     }
-    baseTextRef.current = description;
-    const recognition = new SpeechAPI();
-    recognition.lang = "pt-BR";
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    accumulatedRef.current = description;
+    wantsListeningRef.current = true;
+    const recognition = createRecognition();
+    if (!recognition) return;
     recognitionRef.current = recognition;
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let fullTranscript = "";
-      for (let i = 0; i < event.results.length; i++) {
-        fullTranscript += event.results[i][0].transcript;
-      }
-      const base = baseTextRef.current;
-      const separator = base.length > 0 && !base.endsWith(" ") ? " " : "";
-      setDescription(base + separator + fullTranscript);
-    };
-    recognition.onerror = (event) => {
-      if (event.error !== "aborted") {
-        toast.error("Erro no microfone. Verifique as permissões.");
-      }
-      setIsListening(false);
-    };
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-    recognition.start();
-    setIsListening(true);
-  }, [description]);
+    try {
+      recognition.start();
+      setIsListening(true);
+      setInterimText("");
+    } catch {
+      toast.error("Não foi possível iniciar o microfone.");
+    }
+  }
+
+  function stopListening(): void {
+    wantsListeningRef.current = false;
+    recognitionRef.current?.stop();
+    setIsListening(false);
+    setInterimText("");
+  }
 
   function toggleVoice(): void {
     if (isListening) {
@@ -104,6 +140,9 @@ export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
     }
   }
 
+  const displayText = interimText
+    ? description + (description.length > 0 ? " " : "") + interimText
+    : description;
   const isValid = description.trim().length >= 5;
 
   return (
@@ -138,8 +177,11 @@ export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
           <textarea
             id="description"
             placeholder={PLACEHOLDER}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={displayText}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              accumulatedRef.current = e.target.value;
+            }}
             className={`form-input min-h-[140px] sm:min-h-[160px] resize-y ${isListening ? "ring-2 ring-red-400/50 border-red-400" : ""}`}
             rows={5}
             required
