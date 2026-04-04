@@ -279,3 +279,46 @@ select.form-input {
   background: var(--input-border);
   transform: scale(0.95);
 }
+
+/* Voice button */
+.voice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s,
+    transform 0.1s;
+}
+
+.voice-btn:active {
+  transform: scale(0.95);
+}
+
+.voice-btn-active {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #dc2626;
+  animation: voice-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .voice-btn-active {
+    background: #450a0a;
+    border-color: #dc2626;
+    color: #f87171;
+  }
+}
+
+@keyframes voice-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
