@@ -43,6 +43,7 @@ export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
   const [isListening, setIsListening] = useState(false);
   const [hasSpeech, setHasSpeech] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const baseTextRef = useRef("");
 
   useEffect(() => {
     setHasSpeech(isSpeechSupported());
@@ -59,26 +60,20 @@ export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
       toast.error("Seu navegador não suporta reconhecimento de voz.");
       return;
     }
+    baseTextRef.current = description;
     const recognition = new SpeechAPI();
     recognition.lang = "pt-BR";
     recognition.continuous = true;
     recognition.interimResults = true;
     recognitionRef.current = recognition;
-    let finalTranscript = "";
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let interim = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        } else {
-          interim = transcript;
-        }
+      let fullTranscript = "";
+      for (let i = 0; i < event.results.length; i++) {
+        fullTranscript += event.results[i][0].transcript;
       }
-      setDescription((prev) => {
-        const base = prev.endsWith(" ") || prev.length === 0 ? prev : prev + " ";
-        return (base + finalTranscript + interim).trimStart();
-      });
+      const base = baseTextRef.current;
+      const separator = base.length > 0 && !base.endsWith(" ") ? " " : "";
+      setDescription(base + separator + fullTranscript);
     };
     recognition.onerror = (event) => {
       if (event.error !== "aborted") {
@@ -89,10 +84,9 @@ export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
     recognition.onend = () => {
       setIsListening(false);
     };
-    finalTranscript = "";
     recognition.start();
     setIsListening(true);
-  }, []);
+  }, [description]);
 
   function toggleVoice(): void {
     if (isListening) {
