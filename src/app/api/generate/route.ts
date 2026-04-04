@@ -5,59 +5,29 @@ import type {
   GenerateRequest,
   GenerateResponse,
   GenerateErrorResponse,
-  ProductInput,
 } from "@/types/caption";
-import { PRODUCT_CONDITIONS, PRODUCT_CATEGORIES, CAPTION_TONES } from "@/types/caption";
 
 const OPENAI_MODEL = "gpt-4o-mini";
 const MAX_TOKENS = 500;
-
-function validateProductInput(product: unknown): product is ProductInput {
-  if (!product || typeof product !== "object") return false;
-  const p = product as Record<string, unknown>;
-  const hasRequiredStrings =
-    typeof p.name === "string" &&
-    p.name.trim().length > 0 &&
-    typeof p.description === "string" &&
-    p.description.trim().length > 0;
-  const hasValidPrice = typeof p.price === "number" && p.price > 0;
-  const hasValidCondition =
-    typeof p.condition === "string" &&
-    (PRODUCT_CONDITIONS as readonly string[]).includes(p.condition);
-  const hasValidCategory =
-    typeof p.category === "string" &&
-    (PRODUCT_CATEGORIES as readonly string[]).includes(p.category);
-  const hasValidTone =
-    typeof p.tone === "string" &&
-    (CAPTION_TONES as readonly string[]).includes(p.tone);
-  return (
-    hasRequiredStrings &&
-    hasValidPrice &&
-    hasValidCondition &&
-    hasValidCategory &&
-    hasValidTone
-  );
-}
 
 export async function POST(
   request: Request
 ): Promise<NextResponse<GenerateResponse | GenerateErrorResponse>> {
   try {
     const body = (await request.json()) as GenerateRequest;
-    if (!validateProductInput(body.product)) {
+    const description = body.description?.trim();
+    if (!description || description.length < 5) {
       return NextResponse.json(
-        { error: "Dados do produto inválidos. Verifique todos os campos." },
+        { error: "Descreva o produto com pelo menos algumas palavras." },
         { status: 400 }
       );
     }
-    const systemPrompt = getSystemPrompt();
-    const userPrompt = buildUserPrompt(body.product);
     const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: getSystemPrompt() },
+        { role: "user", content: buildUserPrompt(description) },
       ],
       max_tokens: MAX_TOKENS,
       temperature: 0.8,

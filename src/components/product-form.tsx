@@ -1,171 +1,49 @@
 "use client";
 
 import { useState } from "react";
-import type {
-  ProductInput,
-  ProductCondition,
-  ProductCategory,
-  CaptionTone,
-} from "@/types/caption";
-import {
-  PRODUCT_CONDITIONS,
-  PRODUCT_CONDITION_LABELS,
-  PRODUCT_CATEGORIES,
-  PRODUCT_CATEGORY_LABELS,
-  CAPTION_TONES,
-  CAPTION_TONE_LABELS,
-} from "@/types/caption";
 
 interface ProductFormProps {
-  readonly onSubmit: (product: ProductInput) => void;
+  readonly onSubmit: (description: string) => void;
   readonly isLoading: boolean;
 }
 
-const DEFAULT_FORM_STATE: ProductInput = {
-  name: "",
-  description: "",
-  price: 0,
-  condition: "used",
-  category: "other",
-  tone: "casual",
-};
+const PLACEHOLDER = `Ex: tenis nike air max tamanho 42 usado mas em bom estado só usei umas 3 vezes ta bem conservado vendo por 150 reais...`;
 
 export default function ProductForm({ onSubmit, isLoading }: ProductFormProps) {
-  const [form, setForm] = useState<ProductInput>(DEFAULT_FORM_STATE);
-
-  function updateField<K extends keyof ProductInput>(
-    field: K,
-    value: ProductInput[K]
-  ): void {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  }
+  const [description, setDescription] = useState("");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    onSubmit(form);
+    if (description.trim().length > 0) {
+      onSubmit(description);
+    }
   }
 
-  const isFormValid =
-    form.name.trim().length > 0 &&
-    form.description.trim().length > 0 &&
-    form.price > 0;
+  const isValid = description.trim().length >= 5;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-      <div>
-        <label htmlFor="name" className="form-label">
-          Nome do Produto
-        </label>
-        <input
-          id="name"
-          type="text"
-          placeholder="Ex: Tênis Nike Air Max"
-          value={form.name}
-          onChange={(e) => updateField("name", e.target.value)}
-          className="form-input"
-          required
-        />
-      </div>
-
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label htmlFor="description" className="form-label">
-          Descrição
+          Descreva o produto
         </label>
         <textarea
           id="description"
-          placeholder="Descreva o produto como quiser, pode ter erros que a gente corrige..."
-          value={form.description}
-          onChange={(e) => updateField("description", e.target.value)}
-          className="form-input min-h-[100px] sm:min-h-[120px] resize-y"
-          rows={3}
+          placeholder={PLACEHOLDER}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="form-input min-h-[140px] sm:min-h-[160px] resize-y"
+          rows={5}
           required
         />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        <div>
-          <label htmlFor="price" className="form-label">
-            Preço (R$)
-          </label>
-          <input
-            id="price"
-            type="number"
-            min="0.01"
-            step="0.01"
-            placeholder="0,00"
-            value={form.price || ""}
-            onChange={(e) => updateField("price", parseFloat(e.target.value) || 0)}
-            className="form-input"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="condition" className="form-label">
-            Condição
-          </label>
-          <select
-            id="condition"
-            value={form.condition}
-            onChange={(e) =>
-              updateField("condition", e.target.value as ProductCondition)
-            }
-            className="form-input"
-          >
-            {PRODUCT_CONDITIONS.map((c) => (
-              <option key={c} value={c}>
-                {PRODUCT_CONDITION_LABELS[c]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        <div>
-          <label htmlFor="category" className="form-label">
-            Categoria
-          </label>
-          <select
-            id="category"
-            value={form.category}
-            onChange={(e) =>
-              updateField("category", e.target.value as ProductCategory)
-            }
-            className="form-input"
-          >
-            {PRODUCT_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {PRODUCT_CATEGORY_LABELS[c]}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="tone" className="form-label">
-            Tom da Legenda
-          </label>
-          <select
-            id="tone"
-            value={form.tone}
-            onChange={(e) =>
-              updateField("tone", e.target.value as CaptionTone)
-            }
-            className="form-input"
-          >
-            {CAPTION_TONES.map((t) => (
-              <option key={t} value={t}>
-                {CAPTION_TONE_LABELS[t]}
-              </option>
-            ))}
-          </select>
-        </div>
+        <p className="mt-1.5 text-[12px] sm:text-xs text-foreground/40">
+          Escreva do seu jeito, com erros e tudo. A IA corrige e monta a legenda.
+        </p>
       </div>
 
       <button
         type="submit"
-        disabled={!isFormValid || isLoading}
+        disabled={!isValid || isLoading}
         className="btn-primary w-full"
       >
         {isLoading ? (

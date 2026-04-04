@@ -108,7 +108,7 @@ export default function CaptionHistory({ latestCaption }: CaptionHistoryProps) {
             >
               <div className="flex items-center justify-between mb-2 pr-10">
                 <span className="text-xs font-medium text-foreground/50 truncate">
-                  {item.productName}
+                  {item.preview}
                 </span>
                 <span className="text-[11px] sm:text-xs text-foreground/40 shrink-0 ml-2">
                   {new Date(item.createdAt).toLocaleDateString("pt-BR", {
